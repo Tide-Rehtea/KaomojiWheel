@@ -1,0 +1,15 @@
+﻿<Application x:Class="KaomojiWheel.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <SolidColorBrush x:Key="InkBrush" Color="#FFF5F7FF"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#FFAAB1C5"/>
+        <Style TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}"/>
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Application.Resources>
+</Application>
