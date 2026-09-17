@@ -34,17 +34,13 @@ public partial class App : Application
     }
     private static System.Drawing.Icon CreateTrayIcon()
     {
-        using var bitmap = new System.Drawing.Bitmap(32, 32);
-        using var g = System.Drawing.Graphics.FromImage(bitmap);
-        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-        g.Clear(System.Drawing.Color.Transparent);
-        using var bg = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 31, 37, 56));
-        using var glow = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(255, 127, 151, 235));
-        using var line = new System.Drawing.Pen(System.Drawing.Color.White, 2.2f);
-        g.FillEllipse(bg, 2, 2, 28, 28);
-        for (var i = 0; i < 6; i++) { var a = i * Math.PI / 3; g.FillEllipse(glow, 14.5f + (float)Math.Cos(a) * 12, 14.5f + (float)Math.Sin(a) * 12, 3, 3); }
-        g.DrawArc(line, 9, 8, 14, 14, 25, 130); g.DrawArc(line, 9, 8, 14, 14, 205, 130);
-        var handle = bitmap.GetHicon(); return System.Drawing.Icon.FromHandle(handle);
+        var executable = Environment.ProcessPath;
+        if (!string.IsNullOrWhiteSpace(executable))
+        {
+            using var embedded = System.Drawing.Icon.ExtractAssociatedIcon(executable);
+            if (embedded is not null) return (System.Drawing.Icon)embedded.Clone();
+        }
+        return (System.Drawing.Icon)System.Drawing.SystemIcons.Application.Clone();
     }
     private void ExitApp() { _window?.Dispose(); if (_tray is not null) { _tray.Visible = false; _tray.Dispose(); } Shutdown(); }
     protected override void OnExit(ExitEventArgs e) { _showWait?.Unregister(null); _showEvent?.Dispose(); _tray?.Dispose(); try { _mutex?.ReleaseMutex(); } catch { } _mutex?.Dispose(); base.OnExit(e); }

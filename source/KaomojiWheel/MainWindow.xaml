@@ -39,9 +39,9 @@
         <ControlTemplate x:Key="VerticalScrollBarTemplate" TargetType="ScrollBar">
             <Grid Width="10" Background="Transparent">
                 <Border Width="4" Margin="0,3" HorizontalAlignment="Center" Background="#382E3540" CornerRadius="2"/>
-                <Track x:Name="PART_Track" IsDirectionReversed="True" Focusable="False">
+                <Track x:Name="PART_Track" IsDirectionReversed="True" Focusable="False" Margin="0,3">
                     <Track.DecreaseRepeatButton><RepeatButton Command="ScrollBar.PageUpCommand" Background="Transparent" BorderThickness="0" Opacity="0" Focusable="False"/></Track.DecreaseRepeatButton>
-                    <Track.Thumb><Thumb x:Name="ScrollThumb" MinHeight="28" Margin="1.5,2"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border x:Name="ThumbBody" Background="#858B96A6" BorderBrush="#8ABBC3CF" BorderThickness="1" CornerRadius="4"/><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#B5A1ACBC"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#D7D8DEE8"/></Trigger><Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#D0B4BFCE"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#FFF0F3F8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                    <Track.Thumb><Thumb x:Name="ScrollThumb" MinHeight="28" Margin="1.5,0"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border x:Name="ThumbBody" Background="#858B96A6" BorderBrush="#8ABBC3CF" BorderThickness="1" CornerRadius="4" SnapsToDevicePixels="True"/><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#B5A1ACBC"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#D7D8DEE8"/></Trigger><Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#D0B4BFCE"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#FFF0F3F8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
                     <Track.IncreaseRepeatButton><RepeatButton Command="ScrollBar.PageDownCommand" Background="Transparent" BorderThickness="0" Opacity="0" Focusable="False"/></Track.IncreaseRepeatButton>
                 </Track>
             </Grid>
@@ -49,9 +49,9 @@
         <ControlTemplate x:Key="HorizontalScrollBarTemplate" TargetType="ScrollBar">
             <Grid Height="10" Background="Transparent">
                 <Border Height="4" Margin="3,0" VerticalAlignment="Center" Background="#382E3540" CornerRadius="2"/>
-                <Track x:Name="PART_Track" Focusable="False">
+                <Track x:Name="PART_Track" Focusable="False" Margin="3,0">
                     <Track.DecreaseRepeatButton><RepeatButton Command="ScrollBar.PageLeftCommand" Background="Transparent" BorderThickness="0" Opacity="0" Focusable="False"/></Track.DecreaseRepeatButton>
-                    <Track.Thumb><Thumb MinWidth="28" Margin="2,1.5"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border x:Name="ThumbBody" Background="#858B96A6" BorderBrush="#8ABBC3CF" BorderThickness="1" CornerRadius="4"/><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#B5A1ACBC"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#D7D8DEE8"/></Trigger><Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#D0B4BFCE"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#FFF0F3F8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                    <Track.Thumb><Thumb MinWidth="28" Margin="0,1.5"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border x:Name="ThumbBody" Background="#858B96A6" BorderBrush="#8ABBC3CF" BorderThickness="1" CornerRadius="4" SnapsToDevicePixels="True"/><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#B5A1ACBC"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#D7D8DEE8"/></Trigger><Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#D0B4BFCE"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#FFF0F3F8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
                     <Track.IncreaseRepeatButton><RepeatButton Command="ScrollBar.PageRightCommand" Background="Transparent" BorderThickness="0" Opacity="0" Focusable="False"/></Track.IncreaseRepeatButton>
                 </Track>
             </Grid>
@@ -162,7 +162,7 @@
             </Grid>
         </Border>
 
-        <Border x:Name="SettingsPanel" Width="480" Height="350" Visibility="Collapsed" Background="#E0171B22" BorderBrush="#D1AAB2C0" BorderThickness="1.4" CornerRadius="22" Effect="{StaticResource Shadow}" SnapsToDevicePixels="True">
+        <Border x:Name="SettingsPanel" Width="480" Height="398" Visibility="Collapsed" Background="#E0171B22" BorderBrush="#D1AAB2C0" BorderThickness="1.4" CornerRadius="22" Effect="{StaticResource Shadow}" SnapsToDevicePixels="True">
             <Grid Margin="16"><Grid.ColumnDefinitions><ColumnDefinition Width="132"/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
                 <Border Background="#761F242D" BorderBrush="#687A8494" BorderThickness="1" CornerRadius="15" Padding="6">
                     <StackPanel>
@@ -172,6 +172,7 @@
                         <Button x:Name="StartupTabButton" Style="{StaticResource SettingsNavButton}" Content="开机自启" Margin="0,2" Click="StartupTab_Click"/>
                         <Button x:Name="OrderTabButton" Style="{StaticResource SettingsNavButton}" Content="仓库顺序" Margin="0,2" Click="OrderTab_Click"/>
                         <Button x:Name="MotionTabButton" Style="{StaticResource SettingsNavButton}" Content="减少动效" Margin="0,2" Click="MotionTab_Click"/>
+                        <Button x:Name="DataTabButton" Style="{StaticResource SettingsNavButton}" Content="数据处理" Margin="0,2" Click="DataTab_Click"/>
                         <Button x:Name="UpdateTabButton" Style="{StaticResource SettingsNavButton}" Content="软件更新" Margin="0,2" Click="UpdateTab_Click"/>
                     </StackPanel>
                 </Border>

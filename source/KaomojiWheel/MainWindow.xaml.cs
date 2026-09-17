@@ -19,6 +19,8 @@ using Button = System.Windows.Controls.Button;
 using ListBox = System.Windows.Controls.ListBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using DragEventArgs = System.Windows.DragEventArgs;
+using IODirectory = System.IO.Directory;
+using IOPath = System.IO.Path;
 
 namespace KaomojiWheel;
 
@@ -350,6 +352,48 @@ public partial class MainWindow : Window, IDisposable
     }
     private void MotionTab_Click(object sender,RoutedEventArgs e){SelectSettingsTab(MotionTabButton);var panel=new StackPanel();panel.Children.Add(Heading("减少动态效果"));panel.Children.Add(Description("缩短轮盘出现和翻页时的过渡动画。"));var c=new CheckBox{Content="减少界面动态效果",Style=(Style)FindResource("ToggleSwitch"),Margin=new Thickness(0,20,0,0),IsChecked=_store.Settings.ReduceMotion};c.Checked+=(_,_)=>SetMotion(true);c.Unchecked+=(_,_)=>SetMotion(false);panel.Children.Add(c);SetSettingsContent(panel);}
     private void SetMotion(bool value){_store.Settings.ReduceMotion=value;_store.SaveAll();}
+    private void DataTab_Click(object sender,RoutedEventArgs e)=>ShowDataSettings();
+    private void ShowDataSettings()
+    {
+        SelectSettingsTab(DataTabButton);
+        var panel=new StackPanel();
+        panel.Children.Add(Heading("数据处理"));
+        panel.Children.Add(Description("通过 UTF-8 JSON 批量合并颜文字，或导出全部仓库作为备份。导入只会追加，不会覆盖或删除现有内容。"));
+        var status=new TextBlock{Foreground=(Brush)FindResource("MutedBrush"),TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,14,0,0),FontSize=12,LineHeight=18,MinHeight=36};
+        var import=DataActionCard("导入颜文字","选择 JSON 后先预览新增与重复数量，确认后自动备份并合并。","选择 JSON",()=>ImportKaomoji(status),true);
+        import.Margin=new Thickness(0,16,0,0);panel.Children.Add(import);
+        var export=DataActionCard("导出颜文字","导出全部仓库与当前顺序，不包含快捷键和开机自启设置。","导出 JSON",()=>ExportKaomoji(status),false);
+        export.Margin=new Thickness(0,10,0,0);panel.Children.Add(export);panel.Children.Add(status);SetSettingsContent(panel);
+    }
+    private Border DataActionCard(string title,string description,string buttonText,Action action,bool accent)
+    {
+        var grid=new Grid();grid.ColumnDefinitions.Add(new ColumnDefinition());grid.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
+        var text=new StackPanel{VerticalAlignment=VerticalAlignment.Center};text.Children.Add(new TextBlock{Text=title,Foreground=Brushes.White,FontSize=14,FontWeight=FontWeights.SemiBold});text.Children.Add(new TextBlock{Text=description,Foreground=new SolidColorBrush(Color.FromRgb(151,160,174)),FontSize=11,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,4,14,0),LineHeight=17});grid.Children.Add(text);
+        var button=new Button{Content=buttonText,Style=(Style)FindResource("GlassButton"),VerticalAlignment=VerticalAlignment.Center,MinWidth=82,Background=accent?new SolidColorBrush(Color.FromRgb(77,96,153)):new SolidColorBrush(Color.FromArgb(168,32,37,46))};button.Click+=(_,_)=>action();Grid.SetColumn(button,1);grid.Children.Add(button);
+        return new Border{Background=new SolidColorBrush(Color.FromArgb(88,40,46,57)),BorderBrush=new SolidColorBrush(Color.FromArgb(112,132,143,160)),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(11),Padding=new Thickness(12),Child=grid};
+    }
+    private void ImportKaomoji(TextBlock status)
+    {
+        var dialog=new Microsoft.Win32.OpenFileDialog{Title="导入颜文字 JSON",Filter="颜文字 JSON (*.json)|*.json|所有文件 (*.*)|*.*",CheckFileExists=true,Multiselect=false};
+        var templates=IOPath.Combine(AppContext.BaseDirectory,"ImportTemplates");if(IODirectory.Exists(templates))dialog.InitialDirectory=templates;
+        if(dialog.ShowDialog(this)!=true)return;
+        try
+        {
+            var document=KaomojiTransferService.Load(dialog.FileName);var preview=KaomojiTransferService.Analyze(_store.Data,document);
+            if(preview.AddedRepositories==0&&preview.AddedItems==0){status.Foreground=(Brush)FindResource("MutedBrush");status.Text=$"“{IOPath.GetFileName(dialog.FileName)}”没有可新增内容，已跳过 {preview.SkippedDuplicates} 条重复颜文字。";return;}
+            var message=$"文件：{IOPath.GetFileName(dialog.FileName)}\n包含：{preview.SourceRepositories} 个仓库，{preview.SourceItems} 条颜文字\n\n将新增：{preview.AddedRepositories} 个仓库，{preview.AddedItems} 条颜文字\n将跳过：{preview.SkippedDuplicates} 条重复颜文字\n\n导入前会自动备份现有数据，是否继续？";
+            if(MessageBox.Show(message,"确认导入",MessageBoxButton.YesNo,MessageBoxImage.Information)!=MessageBoxResult.Yes)return;
+            var result=_store.Import(document);status.Foreground=new SolidColorBrush(Color.FromRgb(167,217,197));status.Text=$"导入完成：新增 {result.AddedRepositories} 个仓库、{result.AddedItems} 条颜文字，跳过 {result.SkippedDuplicates} 条重复内容。";
+        }
+        catch(Exception ex){FileLogger.TryWrite(AppContext.BaseDirectory,ex);status.Foreground=Brushes.Salmon;status.Text=$"导入失败：{ex.Message}";}
+    }
+    private void ExportKaomoji(TextBlock status)
+    {
+        var dialog=new Microsoft.Win32.SaveFileDialog{Title="导出颜文字 JSON",Filter="颜文字 JSON (*.json)|*.json",DefaultExt=".json",AddExtension=true,OverwritePrompt=true,FileName=$"KaomojiWheel-{DateTime.Now:yyyyMMdd-HHmmss}.json",InitialDirectory=Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)};
+        if(dialog.ShowDialog(this)!=true)return;
+        try{KaomojiTransferService.Export(dialog.FileName,_store.Data);var itemCount=_store.Data.Repositories.Sum(x=>x.Items.Count);status.Foreground=new SolidColorBrush(Color.FromRgb(167,217,197));status.Text=$"已导出 {_store.Data.Repositories.Count} 个仓库、{itemCount} 条颜文字：{dialog.FileName}";}
+        catch(Exception ex){FileLogger.TryWrite(AppContext.BaseDirectory,ex);status.Foreground=Brushes.Salmon;status.Text=$"导出失败：{ex.Message}";}
+    }
     private void UpdateTab_Click(object sender,RoutedEventArgs e)=>ShowUpdateSettings();
     private void ShowUpdateSettings()
     {
@@ -397,7 +441,7 @@ public partial class MainWindow : Window, IDisposable
     }
     private static TextBlock Heading(string text)=>new(){Text=text,Foreground=Brushes.White,FontSize=20,FontWeight=FontWeights.SemiBold};
     private static TextBlock Description(string text)=>new(){Text=text,Foreground=new SolidColorBrush(Color.FromRgb(151,160,174)),FontSize=12,FontWeight=FontWeights.Medium,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,7,0,0),LineHeight=19};
-    private void SelectSettingsTab(Button selected){foreach(var button in new[]{HotkeyTabButton,StartupTabButton,OrderTabButton,MotionTabButton,UpdateTabButton})button.Tag=button==selected?"Selected":null;}
+    private void SelectSettingsTab(Button selected){foreach(var button in new[]{HotkeyTabButton,StartupTabButton,OrderTabButton,MotionTabButton,DataTabButton,UpdateTabButton})button.Tag=button==selected?"Selected":null;}
     private void SetSettingsContent(UIElement content){SettingsContent.Children.Clear();SettingsContent.Children.Add(content);}
 
     private void OnboardingDone_Click(object sender,RoutedEventArgs e){_store.Settings.OnboardingSeen=true;_store.SaveAll();HideOverlay();}

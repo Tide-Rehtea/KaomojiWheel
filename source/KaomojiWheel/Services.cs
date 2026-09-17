@@ -39,6 +39,22 @@ public sealed class AppStore
     {
         Normalize(false); AtomicWrite(_dataFile, JsonSerializer.Serialize(Data, _json), true); AtomicWrite(_settingsFile, JsonSerializer.Serialize(Settings, _json), false);
     }
+    public KaomojiImportPreview Import(KaomojiTransferDocument document)
+    {
+        var snapshot = JsonSerializer.Serialize(Data, _json);
+        try
+        {
+            var result = KaomojiTransferService.Merge(Data, document);
+            Normalize(false);
+            AtomicWrite(_dataFile, JsonSerializer.Serialize(Data, _json), true);
+            return result;
+        }
+        catch
+        {
+            Data = JsonSerializer.Deserialize<WheelData>(snapshot, _json) ?? new WheelData();
+            throw;
+        }
+    }
     private void AtomicWrite(string target, string content, bool backup)
     {
         var temp = target + ".tmp"; File.WriteAllText(temp, content, new System.Text.UTF8Encoding(false));

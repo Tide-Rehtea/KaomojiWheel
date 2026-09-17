@@ -9,9 +9,10 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>KaomojiWheel</AssemblyName>
     <Product>颜文字轮盘</Product>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
+    <ApplicationIcon>Assets\KaomojiWheel.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
@@ -19,5 +20,12 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="ImportTemplates\kaomoji-starter.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>
