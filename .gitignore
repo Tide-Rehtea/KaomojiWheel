@@ -5,8 +5,8 @@
 work/
 outputs/
 dist/
+archive/
 *.user
 *.suo
 *.tmp
 *.log
-
