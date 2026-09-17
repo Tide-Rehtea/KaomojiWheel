@@ -42,7 +42,7 @@ var wpfThread = new Thread(() =>
 });
 wpfThread.SetApartmentState(ApartmentState.STA); wpfThread.Start(); wpfThread.Join();
 Check(adornerLayerAvailable, "仓库列表具有拖动装饰层");
-Check(UpdateService.CurrentVersion == "1.0.0", "正式版本号");
+Check(UpdateService.CurrentVersion == "1.0.1", "正式版本号");
 Check(UpdateService.IsInstallerInvocation(["--apply-update"]), "OTA 安装模式识别");
 
 if (failures.Count > 0) { Console.Error.WriteLine($"失败 {failures.Count} 项"); return 1; }

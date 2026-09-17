@@ -140,9 +140,9 @@ public partial class MainWindow : Window, IDisposable
         var colors = new[] { "#77849A", "#867D96", "#748E8B", "#927E84", "#74869A", "#928774" };
         var button = CircleButton(repo.Name, Orb, colors[(repo.Order + colorIndex) % colors.Length]);
         button.Tag = repo; button.Click += (_, _) => OpenRepository(repo);
-        var menu = new ContextMenu();
-        var rename = new MenuItem { Header = "重命名" }; rename.Click += (_, _) => OpenInput("renameRepo", repo, "重命名仓库", repo.Name, 12);
-        var delete = new MenuItem { Header = "删除" }; delete.Click += (_, _) => DeleteRepository(repo);
+        var menu = StyledContextMenu();
+        var rename = StyledMenuItem("重命名"); rename.Click += (_, _) => OpenInput("renameRepo", repo, "重命名仓库", repo.Name, 12);
+        var delete = StyledMenuItem("删除", true); delete.Click += (_, _) => DeleteRepository(repo);
         menu.Items.Add(rename); menu.Items.Add(delete); button.ContextMenu = menu;
         Place(button, p, Orb, Orb); WheelCanvas.Children.Add(button);
     }
@@ -237,12 +237,19 @@ public partial class MainWindow : Window, IDisposable
         {
             var b=new Button{Content=new TextBlock{Text=item.Text,TextWrapping=TextWrapping.Wrap,TextAlignment=TextAlignment.Center},Style=(Style)FindResource("GlassButton"),Margin=new Thickness(4),MinHeight=44,Width=146,Tag=item};
             b.Click += async (_,_)=>await CopyAndToast(item.Text,b);
-            var menu=new ContextMenu(); var edit=new MenuItem{Header="编辑"}; edit.Click+=(_,_)=>OpenInput("editItem",item,"编辑颜文字",item.Text,100);
-            var move=new MenuItem{Header="移动到其他仓库"}; foreach(var target in _store.Data.Repositories.Where(x=>x.Id!=_currentRepo.Id)){var mi=new MenuItem{Header=target.Name,Tag=target};mi.Click+=(_,_)=>MoveItem(item,target);move.Items.Add(mi);} var del=new MenuItem{Header="删除"};del.Click+=(_,_)=>DeleteItem(item);
+            var menu=StyledContextMenu(); var edit=StyledMenuItem("编辑"); edit.Click+=(_,_)=>OpenInput("editItem",item,"编辑颜文字",item.Text,100);
+            var move=StyledMenuItem("移动到其他仓库"); foreach(var target in _store.Data.Repositories.Where(x=>x.Id!=_currentRepo.Id)){var mi=StyledMenuItem(target.Name);mi.Tag=target;mi.Click+=(_,_)=>MoveItem(item,target);move.Items.Add(mi);} var del=StyledMenuItem("删除",true);del.Click+=(_,_)=>DeleteItem(item);
             menu.Items.Add(edit);menu.Items.Add(move);menu.Items.Add(del);b.ContextMenu=menu;ItemsPanel.Children.Add(b);
         }
-        if(_currentRepo.Items.Count==0) ItemsPanel.Children.Add(new TextBlock{Text="还没有颜文字",Foreground=(Brush)FindResource("MutedBrush"),Width=310,TextAlignment=TextAlignment.Center,Margin=new Thickness(0,54,0,0)});
     }
+
+    private ContextMenu StyledContextMenu() => new() { Style = (Style)FindResource("GlassContextMenu") };
+    private MenuItem StyledMenuItem(string header, bool destructive = false) => new()
+    {
+        Header = header,
+        Style = (Style)FindResource("GlassMenuItem"),
+        Foreground = destructive ? new SolidColorBrush(Color.FromRgb(242, 158, 166)) : new SolidColorBrush(Color.FromRgb(240, 242, 246))
+    };
 
     private async Task CopyAndToast(string text, UIElement? highlight=null)
     {

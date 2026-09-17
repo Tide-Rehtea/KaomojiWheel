@@ -60,6 +60,63 @@
             <Setter Property="Width" Value="10"/><Setter Property="MinWidth" Value="10"/><Setter Property="Background" Value="Transparent"/><Setter Property="Template" Value="{StaticResource VerticalScrollBarTemplate}"/>
             <Style.Triggers><Trigger Property="Orientation" Value="Horizontal"><Setter Property="Width" Value="Auto"/><Setter Property="MinWidth" Value="0"/><Setter Property="Height" Value="10"/><Setter Property="MinHeight" Value="10"/><Setter Property="Template" Value="{StaticResource HorizontalScrollBarTemplate}"/></Trigger></Style.Triggers>
         </Style>
+        <Style x:Key="GlassContextMenu" TargetType="ContextMenu">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFF0F2F6"/>
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="HasDropShadow" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="#ED171B23" BorderBrush="#C99EA7B6" BorderThickness="1.2" CornerRadius="11" Padding="{TemplateBinding Padding}" Effect="{StaticResource Shadow}">
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="GlassMenuItem" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="#FFF0F2F6"/>
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="MinWidth" Value="142"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="12,0,9,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="ItemBody" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="15"/></Grid.ColumnDefinitions>
+                                    <ContentPresenter ContentSource="Header" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                                    <Viewbox x:Name="SubmenuArrow" Grid.Column="1" Width="10" Height="10" HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed">
+                                        <Path Data="M3,1.5 L7,5 L3,8.5" Stroke="#FFC9CED7" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent"/>
+                                    </Viewbox>
+                            </Grid>
+                            </Border>
+                            <Popup x:Name="PART_Popup" AllowsTransparency="True" Focusable="False" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" Placement="Right" HorizontalOffset="-3" VerticalOffset="-6" PopupAnimation="Fade">
+                                <Border Background="#F2171B23" BorderBrush="#D19EA7B6" BorderThickness="1.2" CornerRadius="11" Padding="5" Effect="{StaticResource Shadow}">
+                                    <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Role" Value="SubmenuHeader"><Setter TargetName="SubmenuArrow" Property="Visibility" Value="Visible"/></Trigger>
+                            <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="ItemBody" Property="Background" Value="#A33A424F"/></Trigger>
+                            <Trigger Property="IsSubmenuOpen" Value="True"><Setter TargetName="ItemBody" Property="Background" Value="#BD3E4755"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.38"/><Setter Property="Cursor" Value="Arrow"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="ListBoxItem"><Setter Property="Foreground" Value="#EFF1F5"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Padding" Value="11,8"/><Setter Property="Margin" Value="0,2"/><Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Grid><Border x:Name="ItemBd" Background="Transparent" CornerRadius="9" Padding="{TemplateBinding Padding}"><ContentPresenter/></Border><Border x:Name="DropBeforeLine" Height="3.5" Margin="2,0" Background="#FF69BEFF" CornerRadius="2" VerticalAlignment="Top" Panel.ZIndex="20" Visibility="Collapsed"/><Border x:Name="DropAfterLine" Height="3.5" Margin="2,0" Background="#FF69BEFF" CornerRadius="2" VerticalAlignment="Bottom" Panel.ZIndex="20" Visibility="Collapsed"/></Grid><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ItemBd" Property="Background" Value="#762D333E"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter TargetName="ItemBd" Property="Background" Value="#B238404D"/></Trigger><Trigger Property="Tag" Value="DropBefore"><Setter TargetName="DropBeforeLine" Property="Visibility" Value="Visible"/></Trigger><Trigger Property="Tag" Value="DropAfter"><Setter TargetName="DropAfterLine" Property="Visibility" Value="Visible"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>
         <DataTemplate x:Key="RepositoryOrderTemplate">
             <Grid Cursor="SizeAll"><Grid.ColumnDefinitions><ColumnDefinition Width="34"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
