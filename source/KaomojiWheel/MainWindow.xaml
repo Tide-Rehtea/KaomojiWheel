@@ -36,22 +36,42 @@
                 <ControlTemplate.Triggers><Trigger Property="IsChecked" Value="True"><Setter TargetName="Track" Property="Background" Value="#B15C687A"/><Setter TargetName="Track" Property="BorderBrush" Value="#D2AAB4C4"/><Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Track" Property="BorderBrush" Value="#FFF0F2F6"/></Trigger></ControlTemplate.Triggers>
             </ControlTemplate></Setter.Value></Setter>
         </Style>
+        <ControlTemplate x:Key="VerticalScrollThumbTemplate" TargetType="Thumb">
+            <Grid x:Name="ThumbRoot" Background="Transparent" ClipToBounds="False" SnapsToDevicePixels="False" UseLayoutRounding="False">
+                <Border x:Name="ThumbSpacer" Width="6" Height="24" Background="Transparent" IsHitTestVisible="False"/>
+                <Rectangle x:Name="ThumbBody" Width="6" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" RadiusX="3" RadiusY="3.5" Fill="#858B96A6" Stroke="#8ABBC3CF" StrokeThickness="1" SnapsToDevicePixels="False" UseLayoutRounding="False"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBody" Property="Fill" Value="#B5A1ACBC"/><Setter TargetName="ThumbBody" Property="Stroke" Value="#D7D8DEE8"/></Trigger>
+                <Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBody" Property="Fill" Value="#D0B4BFCE"/><Setter TargetName="ThumbBody" Property="Stroke" Value="#FFF0F3F8"/></Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="HorizontalScrollThumbTemplate" TargetType="Thumb">
+            <Grid x:Name="ThumbRoot" Background="Transparent" ClipToBounds="False" SnapsToDevicePixels="False" UseLayoutRounding="False">
+                <Border x:Name="ThumbSpacer" Width="24" Height="6" Background="Transparent" IsHitTestVisible="False"/>
+                <Rectangle x:Name="ThumbBody" Width="16" Height="6" HorizontalAlignment="Center" VerticalAlignment="Center" RadiusX="3.5" RadiusY="3" Fill="#858B96A6" Stroke="#8ABBC3CF" StrokeThickness="1" SnapsToDevicePixels="False" UseLayoutRounding="False"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBody" Property="Fill" Value="#B5A1ACBC"/><Setter TargetName="ThumbBody" Property="Stroke" Value="#D7D8DEE8"/></Trigger>
+                <Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBody" Property="Fill" Value="#D0B4BFCE"/><Setter TargetName="ThumbBody" Property="Stroke" Value="#FFF0F3F8"/></Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
         <ControlTemplate x:Key="VerticalScrollBarTemplate" TargetType="ScrollBar">
-            <Grid Width="10" Background="Transparent">
+            <Grid Width="10" Background="Transparent" ClipToBounds="False">
                 <Border Width="4" Margin="0,3" HorizontalAlignment="Center" Background="#382E3540" CornerRadius="2"/>
-                <Track x:Name="PART_Track" IsDirectionReversed="True" Focusable="False" Margin="0,3">
+                <Track x:Name="PART_Track" IsDirectionReversed="True" Focusable="False" Margin="0,3" ClipToBounds="False" ViewportSize="NaN">
                     <Track.DecreaseRepeatButton><RepeatButton Command="ScrollBar.PageUpCommand" Background="Transparent" BorderThickness="0" Opacity="0" Focusable="False"/></Track.DecreaseRepeatButton>
-                    <Track.Thumb><Thumb x:Name="ScrollThumb" MinHeight="28" Margin="1.5,0"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border x:Name="ThumbBody" Background="#858B96A6" BorderBrush="#8ABBC3CF" BorderThickness="1" CornerRadius="4" SnapsToDevicePixels="True"/><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#B5A1ACBC"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#D7D8DEE8"/></Trigger><Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#D0B4BFCE"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#FFF0F3F8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                    <Track.Thumb><Thumb x:Name="ScrollThumb" MinHeight="24" Margin="1.5,0" ClipToBounds="False" SnapsToDevicePixels="False" UseLayoutRounding="False" Template="{StaticResource VerticalScrollThumbTemplate}"/></Track.Thumb>
                     <Track.IncreaseRepeatButton><RepeatButton Command="ScrollBar.PageDownCommand" Background="Transparent" BorderThickness="0" Opacity="0" Focusable="False"/></Track.IncreaseRepeatButton>
                 </Track>
             </Grid>
         </ControlTemplate>
         <ControlTemplate x:Key="HorizontalScrollBarTemplate" TargetType="ScrollBar">
-            <Grid Height="10" Background="Transparent">
+            <Grid Height="10" Background="Transparent" ClipToBounds="False">
                 <Border Height="4" Margin="3,0" VerticalAlignment="Center" Background="#382E3540" CornerRadius="2"/>
-                <Track x:Name="PART_Track" Focusable="False" Margin="3,0">
+                <Track x:Name="PART_Track" Focusable="False" Margin="3,0" ClipToBounds="False" ViewportSize="NaN">
                     <Track.DecreaseRepeatButton><RepeatButton Command="ScrollBar.PageLeftCommand" Background="Transparent" BorderThickness="0" Opacity="0" Focusable="False"/></Track.DecreaseRepeatButton>
-                    <Track.Thumb><Thumb MinWidth="28" Margin="0,1.5"><Thumb.Template><ControlTemplate TargetType="Thumb"><Border x:Name="ThumbBody" Background="#858B96A6" BorderBrush="#8ABBC3CF" BorderThickness="1" CornerRadius="4" SnapsToDevicePixels="True"/><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#B5A1ACBC"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#D7D8DEE8"/></Trigger><Trigger Property="IsDragging" Value="True"><Setter TargetName="ThumbBody" Property="Background" Value="#D0B4BFCE"/><Setter TargetName="ThumbBody" Property="BorderBrush" Value="#FFF0F3F8"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                    <Track.Thumb><Thumb MinWidth="24" Margin="0,1.5" ClipToBounds="False" SnapsToDevicePixels="False" UseLayoutRounding="False" Template="{StaticResource HorizontalScrollThumbTemplate}"/></Track.Thumb>
                     <Track.IncreaseRepeatButton><RepeatButton Command="ScrollBar.PageRightCommand" Background="Transparent" BorderThickness="0" Opacity="0" Focusable="False"/></Track.IncreaseRepeatButton>
                 </Track>
             </Grid>
@@ -157,7 +177,7 @@
                         </Viewbox>
                     </Button>
                 </Grid>
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,8"><WrapPanel x:Name="ItemsPanel" ItemWidth="154"/></ScrollViewer>
+                <ScrollViewer x:Name="ItemsScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,10,0,8"><WrapPanel x:Name="ItemsPanel" ItemWidth="154"/></ScrollViewer>
                 <Button Grid.Row="2" Style="{StaticResource GlassButton}" HorizontalAlignment="Right" Click="AddItem_Click"><StackPanel Orientation="Horizontal" VerticalAlignment="Center"><Viewbox Width="19" Height="19" Margin="0,0,7,0"><Canvas Width="20" Height="20"><Path Data="M10,3.5 V16.5 M3.5,10 H16.5" Stroke="#FFF2F3F6" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Canvas></Viewbox><TextBlock Text="添加颜文字" VerticalAlignment="Center"/></StackPanel></Button>
             </Grid>
         </Border>

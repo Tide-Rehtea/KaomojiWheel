@@ -3,10 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Media;
 
 var failures = new List<string>();
 void Check(bool condition, string name) { Console.WriteLine($"{(condition ? "PASS" : "FAIL")}  {name}"); if (!condition) failures.Add(name); }
@@ -70,16 +73,77 @@ try
 finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
 
 var adornerLayerAvailable = false;
+var scrollThumbGeometrySafe = false;
+var repositoryScrollThumbGeometrySafe = false;
+Exception wpfLayoutError = null;
 var wpfThread = new Thread(() =>
 {
-    var list = new ListBox(); var decorator = new AdornerDecorator { Child = list };
-    decorator.Measure(new Size(300, 200)); decorator.Arrange(new Rect(0, 0, 300, 200)); decorator.UpdateLayout();
-    adornerLayerAvailable = AdornerLayer.GetAdornerLayer(list) is not null;
+    try
+    {
+        var list = new ListBox(); var decorator = new AdornerDecorator { Child = list };
+        decorator.Measure(new Size(300, 200)); decorator.Arrange(new Rect(0, 0, 300, 200)); decorator.UpdateLayout();
+        adornerLayerAvailable = AdornerLayer.GetAdornerLayer(list) is not null;
+
+        var window = new MainWindow(new AppStore(Path.GetTempPath()));
+        var template = (ControlTemplate)window.FindResource("VerticalScrollBarTemplate");
+        var scrollBar = new ScrollBar { Orientation = Orientation.Vertical, Minimum = 0, Maximum = 100000, ViewportSize = 1, Value = 0, Height = 240, Template = template };
+        scrollBar.Measure(new Size(10, 240)); scrollBar.Arrange(new Rect(0, 0, 10, 240)); scrollBar.ApplyTemplate(); scrollBar.UpdateLayout();
+        var track = (Track)template.FindName("PART_Track", scrollBar); var thumb = track.Thumb; thumb.ApplyTemplate();
+        var root = (Grid)thumb.Template.FindName("ThumbRoot", thumb);
+        var spacer = (Border)thumb.Template.FindName("ThumbSpacer", thumb);
+        var body = (System.Windows.Shapes.Rectangle)thumb.Template.FindName("ThumbBody", thumb);
+        var bodyTop = body.TranslatePoint(new Point(0, 0), thumb).Y;
+        var bodyBottom = bodyTop + body.ActualHeight;
+        Console.WriteLine($"滚动条压力布局：Thumb={thumb.ActualWidth:F2}×{thumb.ActualHeight:F2}, Body={body.ActualWidth:F2}×{body.ActualHeight:F2}, Top={bodyTop:F2}, Bottom={bodyBottom:F2}");
+        scrollThumbGeometrySafe = track.Margin.Top >= 3 && track.Margin.Bottom >= 3 && !track.ClipToBounds && thumb.MinHeight == 24 && thumb.ActualHeight >= 24 && spacer.ActualHeight >= 24 && thumb.ActualHeight > body.ActualHeight && !thumb.ClipToBounds && !thumb.SnapsToDevicePixels && !thumb.UseLayoutRounding && !root.ClipToBounds && body.Width == 6 && body.Height == 16 && body.ActualHeight == 16 && bodyTop >= 4 && bodyBottom <= thumb.ActualHeight - 4 && body.RadiusX >= 3 && body.RadiusY >= 3.5 && body.StrokeThickness == 1 && !body.SnapsToDevicePixels && !body.UseLayoutRounding;
+        window.Close();
+
+        var pageRoot = Path.Combine(Path.GetTempPath(), "KaomojiWheel-PageLayout-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var pageStore = new AppStore(pageRoot); pageStore.Load();
+            var pageRepository = new KaomojiRepository { Name = "压力仓库", Order = 0 };
+            for (var i = 0; i < 1000; i++) pageRepository.Items.Add(new KaomojiItem { Text = $"测试 {i}", Order = i });
+            pageStore.Data.Repositories.Add(pageRepository);
+            var pageWindow = new MainWindow(pageStore) { Width = 800, Height = 600, Left = -10000, Top = -10000, Opacity = 0, ShowActivated = false };
+            typeof(MainWindow).GetField("_center", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(pageWindow, new Point(400, 300));
+            pageWindow.Show();
+            typeof(MainWindow).GetMethod("OpenRepository", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(pageWindow, [pageRepository]);
+            pageWindow.Measure(new Size(800, 600)); pageWindow.Arrange(new Rect(0, 0, 800, 600)); pageWindow.UpdateLayout();
+            pageWindow.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Render, new Action(() => { }));
+            var pageViewer = (ScrollViewer)pageWindow.FindName("ItemsScrollViewer");
+            var pageBar = FindVisualChild<ScrollBar>(pageViewer, x => x.Orientation == Orientation.Vertical)!;
+            pageBar.ApplyTemplate(); pageBar.UpdateLayout();
+            var pageTrack = (Track)pageBar.Template.FindName("PART_Track", pageBar); var pageThumb = pageTrack.Thumb; pageThumb.ApplyTemplate(); pageThumb.UpdateLayout();
+            var pageBody = (System.Windows.Shapes.Rectangle)pageThumb.Template.FindName("ThumbBody", pageThumb);
+            var pageTop = pageBody.TranslatePoint(new Point(0, 0), pageThumb).Y; var pageBottom = pageTop + pageBody.ActualHeight;
+            var bodyClip = LayoutInformation.GetLayoutClip(pageBody); var thumbClip = LayoutInformation.GetLayoutClip(pageThumb); var trackClip = LayoutInformation.GetLayoutClip(pageTrack); var barClip = LayoutInformation.GetLayoutClip(pageBar); var viewerClip = LayoutInformation.GetLayoutClip(pageViewer);
+            var thumbSlot = LayoutInformation.GetLayoutSlot(pageThumb);
+            Console.WriteLine($"真实仓库布局：Viewer={pageViewer.ActualWidth:F2}×{pageViewer.ActualHeight:F2}, Bar={pageBar.ActualWidth:F2}×{pageBar.ActualHeight:F2}, Thumb={pageThumb.ActualWidth:F2}×{pageThumb.ActualHeight:F2}, Desired={pageThumb.DesiredSize.Width:F2}×{pageThumb.DesiredSize.Height:F2}, Slot={thumbSlot}, Body={pageBody.ActualWidth:F2}×{pageBody.ActualHeight:F2}, Top={pageTop:F2}, Bottom={pageBottom:F2}, Clips=[Body:{bodyClip?.Bounds},Thumb:{thumbClip?.Bounds},Track:{trackClip?.Bounds},Bar:{barClip?.Bounds},Viewer:{viewerClip?.Bounds}]");
+            repositoryScrollThumbGeometrySafe = double.IsNaN(pageTrack.ViewportSize) && pageThumb.ActualHeight >= 24 && pageBody.ActualHeight == 16 && pageTop >= 4 && pageBottom <= pageThumb.ActualHeight - 4 && bodyClip is null && thumbClip is null;
+            pageWindow.Close();
+        }
+        finally { if (Directory.Exists(pageRoot)) Directory.Delete(pageRoot, true); }
+    }
+    catch (Exception ex) { wpfLayoutError = ex; }
 });
 wpfThread.SetApartmentState(ApartmentState.STA); wpfThread.Start(); wpfThread.Join();
 Check(adornerLayerAvailable, "仓库列表具有拖动装饰层");
-Check(UpdateService.CurrentVersion == "1.0.3", "正式版本号");
+Check(wpfLayoutError is null && scrollThumbGeometrySafe, "滚动条滑块端点保留内部圆角安全区");
+Check(wpfLayoutError is null && repositoryScrollThumbGeometrySafe, "真实仓库页面保持滚动条最小尺寸");
+Check(UpdateService.CurrentVersion == "1.0.4", "正式版本号");
 Check(UpdateService.IsInstallerInvocation(["--apply-update"]), "OTA 安装模式识别");
 
 if (failures.Count > 0) { Console.Error.WriteLine($"失败 {failures.Count} 项"); return 1; }
 Console.WriteLine("全部冒烟测试通过。"); return 0;
+
+static T FindVisualChild<T>(DependencyObject parent, Func<T, bool> predicate = null) where T : DependencyObject
+{
+    for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+    {
+        var child = VisualTreeHelper.GetChild(parent, i);
+        if (child is T match && (predicate is null || predicate(match))) return match;
+        var nested = FindVisualChild<T>(child, predicate); if (nested is not null) return nested;
+    }
+    return null;
+}

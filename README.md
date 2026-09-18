@@ -25,7 +25,7 @@ dotnet run --project source/KaomojiWheel.SmokeTests/KaomojiWheel.SmokeTests.cspr
 生成正式发布包：
 
 ```powershell
-./scripts/Build-Release.ps1 -Version 1.0.3
+./scripts/Build-Release.ps1 -Version 1.0.4
 ```
 
 完整 OTA 架构和发版流程见 [docs/OTA-发布指南.md](docs/OTA-发布指南.md)。
